@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    # The same checks every commit passes locally: npm run check + a production build.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+
+  docker:
+    # Keeps the documented "docker compose up" path working.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose up --build --detach --wait
+      - name: Smoke test
+        run: |
+          curl --fail --silent --show-error --retry 10 --retry-delay 2 --retry-all-errors \
+            http://localhost:3000/api/v1/1/actions/blueprints/bp_01jk766tckfwx84xjcxazggzyc/graph > /dev/null
+          curl --fail --silent --show-error --retry 10 --retry-delay 2 --retry-all-errors \
+            http://localhost:5173 > /dev/null
+      - run: docker compose run --rm --no-deps app npm run check
+      - if: always()
+        run: docker compose down

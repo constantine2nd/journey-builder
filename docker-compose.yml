@@ -1,0 +1,38 @@
+# One command for a reproducible local setup:  docker compose up --build
+# Host ports are variables, e.g.  MOCK_API_PORT=3001 APP_PORT=5174 docker compose up
+services:
+  mock-api:
+    build:
+      context: docker
+      dockerfile: mock-server.Dockerfile
+    ports:
+      - "${MOCK_API_PORT:-3000}:3000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "http://localhost:3000/api/v1/1/actions/blueprints/healthcheck/graph",
+        ]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-5173}:5173"
+    environment:
+      # The browser calls the API, so this is the host-side address of mock-api.
+      VITE_API_BASE_URL: "http://localhost:${MOCK_API_PORT:-3000}"
+      # Active prefill sources, comma-separated ids in display order. Empty = all.
+      VITE_PREFILL_SOURCES: "${VITE_PREFILL_SOURCES:-}"
+    volumes:
+      # Live reload: source comes from the host...
+      - ./:/app
+      # ...but node_modules stays the one installed in the image.
+      - /app/node_modules
+    depends_on:
+      mock-api:
+        condition: service_healthy

@@ -42,6 +42,8 @@ export default tseslint.config(
     files: ["**/*.test.{ts,tsx}", "src/test/**"],
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
+      // vi.fn(async () => Response.json(...)) reads better than Promise.resolve().
+      "@typescript-eslint/require-await": "off",
     },
   },
   {

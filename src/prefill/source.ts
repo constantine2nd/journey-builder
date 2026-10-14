@@ -47,6 +47,26 @@ export interface DataSource {
   describe(reference: DataReference, context: SourceContext): string | undefined;
 }
 
+/** A group tagged with the source that produced it; `key` is unique across sources. */
+export interface SourcedGroup extends DataGroup {
+  readonly sourceId: string;
+  readonly key: string;
+}
+
+/** Every group the active sources offer for the target form, in source order. */
+export function collectGroups(
+  sources: readonly DataSource[],
+  context: SourceContext,
+): SourcedGroup[] {
+  return sources.flatMap((source) =>
+    source.getGroups(context).map((group) => ({
+      ...group,
+      sourceId: source.id,
+      key: `${source.id}/${group.id}`,
+    })),
+  );
+}
+
 /**
  * The label of a stored reference, asking each source in turn. A reference no
  * active source recognises (its source was turned off, or the data changed)

@@ -9,8 +9,8 @@ jobs:
     # The same checks every commit passes locally: npm run check + a production build.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -22,7 +22,7 @@ jobs:
     # Keeps the documented "docker compose up" path working.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: docker compose up --build --detach --wait
       - name: Smoke test
         run: |

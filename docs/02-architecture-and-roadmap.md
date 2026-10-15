@@ -102,8 +102,8 @@ Each commit passes `npm run check` (typecheck, lint, format, tests) in the conta
 
 6. `feat(graph): index and dependency traversal` (D8)
 7. `feat(prefill): data references and the data source contract` (D2, D3)
-8. `feat(prefill): source registry and configuration` (D4) + the 7-combination test
-9. `feat(prefill): the three sources from the brief`
+8. `feat(prefill): the three sources from the brief` (done before the registry, which needs them)
+9. `feat(prefill): source registry and configuration` (D4) + the 7-combination test
 10. `feat(prefill): mapping state` (D6)
 
 ### Thu 15 Oct · UI, integration, docs
@@ -112,7 +112,7 @@ Each commit passes `npm run check` (typecheck, lint, format, tests) in the conta
 12. `feat(ui): form list and prefill panel`
 13. `feat(ui): two-pane data picker` (D5)
 14. `test: full prefill flow`
-15. `feat(prefill): example source` + `docs: how to add a data source` (B5)
+15. `refactor(prefill): parse any { type, value } expression` (found while adding the example), then `feat(prefill): example source` + `docs: how to add a data source` (B5)
 16. `docs: README and decisions log`
 
 ### Fri 16 Oct · submit
@@ -121,7 +121,7 @@ Fresh clone → `docker compose up --build` → walkthrough against the referenc
 
 ## Status
 
-- [ ] Tue: 1–5
-- [ ] Wed: 6–10
-- [ ] Thu: 11–16
+- [x] Tue: 1–5
+- [x] Wed: 6–10
+- [x] Thu: 11–16
 - [ ] Fri: submitted

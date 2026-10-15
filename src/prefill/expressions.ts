@@ -9,8 +9,12 @@ import { EMPTY_STATE, type FormPrefill, type PrefillState } from "./state";
  * DataReference and that expression (decision D3). The shape follows the
  * `{ type, value }` vocabulary the mock's own form config uses
  * (`{ "type": "form_field", "value": "id" }`), extended with the data a
- * reference needs. A real backend may need other shapes; only this file
- * would change.
+ * reference needs: `type` is the reference kind, `value` its fields.
+ *
+ * Parsing is shape-only on purpose: any kind round-trips, so a new source
+ * with a new kind needs no change here. Whether a parsed reference is
+ * meaningful is decided by the sources, through describe(); one nobody
+ * recognises is shown as unavailable rather than hidden.
  */
 export interface MappingExpression {
   type: DataReference["kind"];
@@ -22,37 +26,18 @@ export function toExpression(reference: DataReference): MappingExpression {
   return { type: kind, value: { ...value } };
 }
 
-/** The reference an expression denotes, or undefined for a shape this app does not know. */
+/** The reference an expression denotes, or undefined for a shape this app does not use. */
 export function fromExpression(expression: unknown): DataReference | undefined {
-  if (!isRecord(expression) || !isRecord(expression.value)) return undefined;
+  if (!isRecord(expression)) return undefined;
   const { type, value } = expression;
-  const text = (key: string) => (typeof value[key] === "string" ? value[key] : undefined);
-
-  switch (type) {
-    case "form_field": {
-      const nodeId = text("nodeId");
-      const field = text("field");
-      return nodeId && field ? { kind: "form_field", nodeId, field } : undefined;
-    }
-    case "form_meta": {
-      const nodeId = text("nodeId");
-      return nodeId && value.property === "completed_at"
-        ? { kind: "form_meta", nodeId, property: "completed_at" }
-        : undefined;
-    }
-    case "global": {
-      const group = text("group");
-      const key = text("key");
-      return group && key ? { kind: "global", group, key } : undefined;
-    }
-    default:
-      return undefined;
-  }
+  if (typeof type !== "string" || !isRecord(value)) return undefined;
+  if (!Object.values(value).every((item) => typeof item === "string")) return undefined;
+  return { kind: type, ...value } as DataReference;
 }
 
 /**
  * Initial prefill state from the graph's saved `input_mapping`s. Expressions
- * this app cannot read are left out, so an unknown rule never breaks the UI.
+ * of another shape are left out, so an unknown rule never breaks the UI.
  */
 export function stateFromGraph(graph: BlueprintGraph): PrefillState {
   const state: Record<string, FormPrefill> = {};
@@ -71,5 +56,5 @@ export function stateFromGraph(graph: BlueprintGraph): PrefillState {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

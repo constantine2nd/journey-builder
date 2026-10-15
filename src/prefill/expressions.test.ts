@@ -22,19 +22,20 @@ describe("toExpression / fromExpression", () => {
     });
   });
 
-  it("reads nothing into shapes it does not know", () => {
+  it("reads any { type, value: strings } shape, so a new kind round-trips", () => {
+    expect(fromExpression({ type: "tenant_setting", value: { key: "locale" } })).toEqual({
+      kind: "tenant_setting",
+      key: "locale",
+    });
+  });
+
+  it("reads nothing into other shapes", () => {
     expect(fromExpression(undefined)).toBeUndefined();
     expect(fromExpression("email")).toBeUndefined();
     expect(fromExpression({ type: "jsonata", value: "$.email" })).toBeUndefined();
-    expect(
-      fromExpression({ type: "form_field", value: { nodeId: "a" } }),
-    ).toBeUndefined();
-    expect(
-      fromExpression({
-        type: "form_meta",
-        value: { nodeId: "a", property: "started_at" },
-      }),
-    ).toBeUndefined();
+    expect(fromExpression({ value: { field: "email" } })).toBeUndefined();
+    expect(fromExpression({ type: "form_field", value: { depth: 2 } })).toBeUndefined();
+    expect(fromExpression({ type: "form_field", value: ["a"] })).toBeUndefined();
   });
 });
 

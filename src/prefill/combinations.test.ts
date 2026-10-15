@@ -58,7 +58,7 @@ describe("any combination of data sources", () => {
   });
 
   it("tags every group with its source and a key unique across sources", () => {
-    const groups = collectGroups(resolveSources(undefined), context);
+    const groups = collectGroups(resolveSources(SOURCE_IDS), context);
     expect(groups.map((group) => group.sourceId)).toEqual([
       "direct_dependencies",
       "transitive_dependencies",

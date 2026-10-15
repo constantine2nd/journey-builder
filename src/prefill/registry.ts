@@ -1,4 +1,5 @@
 import type { DataSource } from "./source";
+import { blueprintPropertiesSource } from "./sources/blueprintProperties";
 import {
   directDependenciesSource,
   transitiveDependenciesSource,
@@ -17,4 +18,5 @@ export const registeredSources: readonly DataSource[] = [
   directDependenciesSource,
   transitiveDependenciesSource,
   globalDataSource,
+  blueprintPropertiesSource,
 ];

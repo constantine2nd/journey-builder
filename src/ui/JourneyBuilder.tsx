@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { BlueprintGraph } from "../api/schema";
 import { formOf, indexGraph } from "../graph";
 import { stateFromGraph } from "../prefill/expressions";
+import type { GroupOrder } from "../prefill/groupOrder";
 import type { DataReference } from "../prefill/model";
 import {
   describeReference,
@@ -9,6 +10,7 @@ import {
   type SourceContext,
 } from "../prefill/source";
 import { usePrefill } from "../prefill/usePrefill";
+import { DataPicker } from "./DataPicker";
 import { FormList } from "./FormList";
 import { PrefillPanel } from "./PrefillPanel";
 
@@ -16,16 +18,20 @@ interface JourneyBuilderProps {
   graph: BlueprintGraph;
   /** The active data sources, in display order (decision D4). */
   sources: readonly DataSource[];
+  /** How the picker orders groups (decision D5). */
+  groupOrder?: GroupOrder | undefined;
 }
 
 /**
  * The loaded app: the form list on the left, the selected form's prefill
- * panel on the right. Owns the selection and the prefill state.
+ * panel on the right, and the picker when a row is being configured.
+ * Owns the selection, the field being edited, and the prefill state.
  */
-export function JourneyBuilder({ graph, sources }: JourneyBuilderProps) {
+export function JourneyBuilder({ graph, sources, groupOrder }: JourneyBuilderProps) {
   const index = useMemo(() => indexGraph(graph), [graph]);
   const prefill = usePrefill(useMemo(() => stateFromGraph(graph), [graph]));
   const [selectedNodeId, setSelectedNodeId] = useState<string>();
+  const [editingField, setEditingField] = useState<string>();
 
   const selectedNode = selectedNodeId ? index.nodesById.get(selectedNodeId) : undefined;
   const selectedForm = selectedNode && formOf(index, selectedNode);
@@ -39,6 +45,11 @@ export function JourneyBuilder({ graph, sources }: JourneyBuilderProps) {
   const describe = (reference: DataReference) =>
     context ? describeReference(sources, reference, context) : "";
 
+  const selectForm = (nodeId: string) => {
+    setSelectedNodeId(nodeId);
+    setEditingField(undefined);
+  };
+
   return (
     <main className="app">
       <header className="app__header">
@@ -49,7 +60,7 @@ export function JourneyBuilder({ graph, sources }: JourneyBuilderProps) {
         <FormList
           nodes={index.formNodes}
           selectedNodeId={selectedNodeId}
-          onSelect={setSelectedNodeId}
+          onSelect={selectForm}
         />
 
         <div className="app__detail">
@@ -62,7 +73,7 @@ export function JourneyBuilder({ graph, sources }: JourneyBuilderProps) {
               onToggle={(enabled) => {
                 prefill.setEnabled(selectedNode.id, enabled);
               }}
-              onPick={() => undefined}
+              onPick={setEditingField}
               onClear={(field) => {
                 prefill.clearMapping(selectedNode.id, field);
               }}
@@ -72,6 +83,22 @@ export function JourneyBuilder({ graph, sources }: JourneyBuilderProps) {
           )}
         </div>
       </div>
+
+      {selectedNode && context && editingField !== undefined && (
+        <DataPicker
+          field={editingField}
+          sources={sources}
+          context={context}
+          groupOrder={groupOrder}
+          onSelect={(reference) => {
+            prefill.setMapping(selectedNode.id, editingField, reference);
+            setEditingField(undefined);
+          }}
+          onClose={() => {
+            setEditingField(undefined);
+          }}
+        />
+      )}
     </main>
   );
 }

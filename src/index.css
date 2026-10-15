@@ -370,3 +370,77 @@ body {
 .prefill-row__clear:hover:not(:disabled) {
   background: var(--color-muted);
 }
+
+/* ---- data picker ----------------------------------------------------- */
+
+.picker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  min-height: 360px;
+}
+@media (max-width: 640px) {
+  .picker {
+    grid-template-columns: 1fr;
+  }
+}
+.picker__tree {
+  padding: 16px 20px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+.picker__heading {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 500;
+}
+.picker__field {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--color-muted);
+}
+.picker__tree .search-box {
+  margin-bottom: 10px;
+}
+.picker__empty,
+.picker__placeholder {
+  margin: 12px 0;
+  color: var(--color-muted);
+}
+.picker__elements {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.picker__element {
+  width: 100%;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.picker__element:hover {
+  background: #eaeef2;
+}
+.picker__element[aria-pressed="true"] {
+  background: var(--color-accent);
+  color: #fff;
+}
+.picker__detail {
+  padding: 16px 20px;
+}
+.picker__details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+.picker__details dt {
+  color: var(--color-muted);
+}
+.picker__details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
